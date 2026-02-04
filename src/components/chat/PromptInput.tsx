@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 import { Plus, Copy, Send, Check } from 'lucide-react';
 import { usePromptStore } from '../../hooks/usePromptStore';
 
-const PromptInput: React.FC = () => {
+interface PromptInputProps {
+  className?: string;
+  isFloating?: boolean;
+}
+
+const PromptInput: React.FC<PromptInputProps> = ({ className = '', isFloating = true }) => {
   const { prompt, setPrompt } = usePromptStore();
   const [copied, setCopied] = useState(false);
 
@@ -17,10 +22,14 @@ const PromptInput: React.FC = () => {
     }
   };
 
+  const containerClasses = isFloating 
+    ? "fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4 z-50"
+    : `w-full max-w-4xl mx-auto px-4 ${className}`;
+
   return (
-    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4 z-50">
+    <div className={containerClasses}>
       <div 
-        className="backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-4"
+        className="backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-6"
         style={{
           background: 'linear-gradient(180deg, rgba(66, 67, 72, 0.8) 0%, rgba(32, 33, 37, 0.6) 100%)'
         }}
@@ -29,7 +38,7 @@ const PromptInput: React.FC = () => {
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="点击提示词标签或输入提示词"
-          className="w-full bg-transparent border-none text-white placeholder-gray-500 focus:ring-0 outline-none shadow-none resize-none h-20 text-sm leading-relaxed"
+          className="w-full bg-transparent border-none text-white placeholder-gray-500 focus:ring-0 outline-none shadow-none resize-none h-24 text-lg leading-relaxed"
         />
         
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-700/50">
