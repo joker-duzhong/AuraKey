@@ -29,3 +29,60 @@ model Setting {
 
   @@map("settings")
 }
+
+model GalleryItem {
+  id           String   @id @default(cuid())
+  url          String
+  title        String
+  author       String
+  avatar       String
+  likes        Int      @default(0)
+  width        Int
+  height       Int
+  category     String
+  prompt       String
+  model        String
+  ratio        String
+  resolution   String
+  refImages    String[] @default([])
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  @@map("gallery_items")
+}
+
+model Artist {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  previewUrl  String   @map("preview_url")
+  tags        String[] @default([])
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  @@map("artists")
+}
+
+model Category {
+  id            String   @id @default(cuid())
+  mainCategory  String   @unique
+  subCategories Json
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+
+  @@map("categories")
+}
+
+model Sref {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  previewUrl String   @map("preview_url")
+  tags      String[] @default([])
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("srefs")
+}

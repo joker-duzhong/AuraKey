@@ -1,34 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import TagSection from '../components/tags/TagSection';
-import { categoriesData, ArtistData, SrefData } from '../mock/categories';
+import { useArtistStore } from '../hooks/useArtistStore';
+import { useGalleryStore } from '../hooks/useGalleryStore';
+import { useSrefStore } from '../hooks/useSrefStore';
+import { useCategoriesStore } from '../hooks/useCategoriesStore';
 import { Sparkles, Search, Copy, Check } from 'lucide-react';
 
 const Home: React.FC = () => {
-  const [activeTab, setActiveTab] = useState(categoriesData.categories[0].mainCategory);
+  const [activeTab, setActiveTab] = useState('主体 (Subject)');
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const activeCategory = categoriesData.categories.find(
-    cat => cat.mainCategory === activeTab
-  );
+  const { artists, fetchArtists } = useArtistStore();
+  const { items: galleryItems, fetchGalleryItems, loading: galleryLoading } = useGalleryStore();
+  const { srefs, fetchSrefs } = useSrefStore();
+  const { categories, fetchCategories } = useCategoriesStore();
+
+  // 从 API 获取分类数据
+  React.useEffect(() => {
+    fetchCategories().catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 获取当前活跃的分类
+  const activeCategory = useMemo(() => {
+    return categories.find(cat => cat.mainCategory === activeTab);
+  }, [categories, activeTab]);
 
   // 模糊搜索逻辑
-  const filteredSubCategories = activeCategory?.subCategories.map(sub => ({
-    ...sub,
-    phrases: sub.phrases.filter(phrase => 
-      phrase.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  })).filter(sub => sub.phrases.length > 0) || [];
+  const filteredSubCategories = useMemo(() => {
+    return activeCategory?.subCategories.map(sub => ({
+      ...sub,
+      phrases: sub.phrases.filter(phrase => 
+        phrase.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    })).filter(sub => sub.phrases.length > 0) || [];
+  }, [activeCategory, searchQuery]);
 
-  const filteredArtists = ArtistData.filter(artist => 
-    artist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    artist.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredArtists = useMemo(() => {
+    return (artists || []).filter(artist => 
+      artist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      artist.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  }, [artists, searchQuery]);
 
-  const filteredSrefs = SrefData.filter(sref => 
-    sref.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    sref.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredSrefs = useMemo(() => {
+    return (srefs || []).filter(sref => 
+      sref.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      sref.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  }, [srefs, searchQuery]);
 
   const handleCopy = (code: string, id: string) => {
     navigator.clipboard.writeText(code);
@@ -36,13 +57,30 @@ const Home: React.FC = () => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  // 当 activeTab 改变时，加载相应的数据
+  React.useEffect(() => {
+    if (activeTab === '艺术家') {
+      fetchArtists().catch(() => {});
+    } else if (activeTab === 'Midjourney风格码') {
+      fetchSrefs().catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  // 首页加载时获取画廊数据和Sref数据
+  React.useEffect(() => {
+    fetchGalleryItems().catch(() => {});
+    fetchSrefs().catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-[#0B0C0E]">
       {/* Top Header Section */}
       <div className="border-b border-white/5 bg-background/50 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto py-4 px-10 flex items-center justify-between">
           <div className="flex items-center space-x-1 bg-gray-900/80 p-1.5 rounded-xl border border-white/5 overflow-x-auto no-scrollbar">
-            {categoriesData.categories.map((cat) => (
+            {categories.map((cat) => (
               <button
                 key={cat.mainCategory}
                 onClick={() => setActiveTab(cat.mainCategory)}
@@ -100,42 +138,60 @@ const Home: React.FC = () => {
       <div className="flex-1 overflow-y-auto px-10 py-8">
         <div className="max-w-7xl mx-auto pb-20">
           {activeTab === '艺术家' ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-x-4 gap-y-10">
-              {filteredArtists.length > 0 ? (
-                filteredArtists.map((artist) => (
-                  <div key={artist.id} className="group cursor-pointer">
-                    <div className="aspect-square rounded-2xl overflow-hidden bg-gray-900/50 border border-white/5 group-hover:border-blue-500/30 transition-all relative">
-                      <img 
-                        src={artist.previewUrl} 
-                        alt={artist.name} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                    <div className="mt-3 text-center">
-                      <p className="text-gray-400 text-xs font-medium">by {artist.name}</p>
-                    </div>
-                  </div>
-                ))
+            <div>
+              {galleryLoading && galleryItems.length === 0 ? (
+                <div className="py-6 text-gray-400">正在加载画廊示例...</div>
               ) : (
-                <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-500 space-y-4">
-                  <Search className="w-12 h-12 opacity-20" />
-                  <p>未找到相关艺术家</p>
-                </div>
+                galleryItems && galleryItems.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+                    {galleryItems.slice(0, 6).map((it) => (
+                      <div key={it.id} className="group cursor-pointer">
+                        <div className="aspect-square rounded-2xl overflow-hidden bg-gray-900/50 border border-white/5 group-hover:border-blue-500/30 transition-all relative">
+                          <img src={it.url} alt={it.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
               )}
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-x-4 gap-y-10">
+                {filteredArtists.length > 0 ? (
+                  filteredArtists.map((artist) => (
+                    <div key={artist.id} className="group cursor-pointer">
+                      <div className="aspect-square rounded-2xl overflow-hidden bg-gray-900/50 border border-white/5 group-hover:border-blue-500/30 transition-all relative">
+                        <img 
+                          src={artist.previewUrl} 
+                          alt={artist.name} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                        />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <div className="mt-3 text-center">
+                        <p className="text-gray-400 text-xs font-medium">by {artist.name}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-500 space-y-4">
+                    <Search className="w-12 h-12 opacity-20" />
+                    <p>未找到相关艺术家</p>
+                  </div>
+                )}
+              </div>
             </div>
           ) : activeTab === 'Midjourney风格码' ? (
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredSrefs.length > 0 ? (
                   filteredSrefs.map((sref) => (
                     <div key={sref.id} className="group bg-gray-900/40 rounded-3xl border border-white/5 overflow-hidden hover:border-blue-500/30 transition-all">
-                      <div className="aspect-[4/3] overflow-hidden relative">
+                      <div className="aspect-4/3 overflow-hidden relative">
                         <img 
                           src={sref.previewUrl} 
                           alt={sref.code} 
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
                       <div className="p-5 space-y-4">
                         <div 

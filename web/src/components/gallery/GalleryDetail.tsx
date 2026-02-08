@@ -1,13 +1,21 @@
 import React from 'react';
 import { X, Heart, MoreHorizontal, Copy, RotateCcw, Maximize2, Share2, Download } from 'lucide-react';
-import type { GalleryItem } from '../../mock/gallery';
+import type { GalleryItem } from '../../services/gallery.service';
+import { useGalleryStore } from '../../hooks/useGalleryStore';
 
 interface GalleryDetailProps {
   item: GalleryItem;
   onClose: () => void;
 }
 
-const GalleryDetail: React.FC<GalleryDetailProps> = ({ item, onClose }) => {
+  const GalleryDetail: React.FC<GalleryDetailProps> = ({ item, onClose }) => {
+  const { likeItem } = useGalleryStore();
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    likeItem(item.id).catch(() => {});
+  };
+
   return (
     <div 
       className="fixed inset-0 z-[100] bg-black flex items-center justify-center animate-in fade-in zoom-in-95 duration-200"
@@ -64,7 +72,9 @@ const GalleryDetail: React.FC<GalleryDetailProps> = ({ item, onClose }) => {
                   <Download className="w-5 h-5" />
                 </button>
                 <div className="flex flex-col items-center px-2">
-                  <Heart className="w-5 h-5 text-white/40 hover:text-red-500 transition-colors cursor-pointer" />
+                  <button onClick={handleLike} className="cursor-pointer">
+                    <Heart className="w-5 h-5 text-white/40 hover:text-red-500 transition-colors" />
+                  </button>
                   <span className="text-[10px] text-gray-500 mt-1">{item.likes}</span>
                 </div>
                 <button className="text-gray-500 hover:text-white p-2 transition-colors">

@@ -2,6 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
+import galleryRoutes from './routes/gallery.routes';
+import artistRoutes from './routes/artist.routes';
+import categoryRoutes from './routes/category.routes';
+import srefRoutes from './routes/sref.routes';
 
 dotenv.config();
 
@@ -22,6 +26,10 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/gallery', galleryRoutes);
+app.use('/api/artists', artistRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/srefs', srefRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

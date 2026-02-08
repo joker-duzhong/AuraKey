@@ -1,21 +1,29 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 import { Search, Heart, ImageIcon, ArrowUp, Share2, Download } from 'lucide-react';
-import { galleryData, type GalleryItem } from '../mock/gallery';
 import GalleryDetail from '../components/gallery/GalleryDetail';
+import { useGalleryStore } from '../hooks/useGalleryStore';
+import type { GalleryItem } from '../services/gallery.service';
 
 const Gallery: React.FC = () => {
-  const [items, setItems] = useState<GalleryItem[]>(galleryData);
-  const [filter, setFilter] = useState<'Newest' | 'Hottest'>('Newest');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [showBackToTop, setShowBackToTop] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
+  const [filter, setFilter] = React.useState<'Newest' | 'Hottest'>('Newest');
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [showBackToTop, setShowBackToTop] = React.useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const {
+    items,
+    loading,
+    error,
+    fetchGalleryItems,
+    likeItem,
+    selectedItem,
+    setSelectedItem,
+  } = useGalleryStore();
 
   // 0. 过滤与排序逻辑
   const filteredData = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
-    let result = galleryData.filter(item => 
+    let result = (items || []).filter(item =>
       item.title.toLowerCase().includes(query) ||
       item.author.toLowerCase().includes(query) ||
       item.prompt.toLowerCase().includes(query)
@@ -32,12 +40,13 @@ const Gallery: React.FC = () => {
       });
     }
     return result;
-  }, [searchQuery, filter]);
+  }, [items, searchQuery, filter]);
 
-  // 当搜索或过滤改变时，重置显示的项目
+  // 页面加载时拉取画廊数据
   useEffect(() => {
-    setItems(filteredData);
-  }, [filteredData]);
+    fetchGalleryItems().catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 1. 动态自适应列数
   const getColumnCount = () => {
@@ -50,7 +59,7 @@ const Gallery: React.FC = () => {
     return 2;                    // 移动端
   };
 
-  const [cols, setCols] = useState(getColumnCount());
+  const [cols, setCols] = React.useState(getColumnCount());
 
   useEffect(() => {
     const handleResize = () => setCols(getColumnCount());
@@ -63,7 +72,7 @@ const Gallery: React.FC = () => {
     const columns: GalleryItem[][] = Array.from({ length: cols }, () => []);
     const heights = new Array(cols).fill(0);
 
-    items.forEach((item) => {
+    (items || []).forEach((item) => {
       // 找到当前高度最短的那一列
       let shortestIndex = 0;
       for (let i = 1; i < cols; i++) {
@@ -81,28 +90,20 @@ const Gallery: React.FC = () => {
   }, [items, cols]);
 
   const loadMore = useCallback(() => {
-    if (loading) return;
-    setLoading(true);
-    setTimeout(() => {
-      const moreItems = filteredData.map(item => ({
-        ...item,
-        id: Math.random().toString(36).substr(2, 9)
-      }));
-      setItems(prev => [...prev, ...moreItems]);
-      setLoading(false);
-    }, 1000);
-  }, [loading, filteredData]);
+    // 简化的加载更多：如果后端支持分页，请在此处调用分页 API
+    return;
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
       const container = scrollContainerRef.current;
       if (!container) return;
       
-      const { scrollTop, scrollHeight, clientHeight } = container;
-      if (scrollTop + clientHeight >= scrollHeight - 200) {
-        loadMore();
-      }
-      setShowBackToTop(scrollTop > 400);
+        const { scrollTop, scrollHeight, clientHeight } = container;
+        if (scrollTop + clientHeight >= scrollHeight - 200) {
+          // 保留位置，未来可接入分页
+        }
+        setShowBackToTop(scrollTop > 400);
     };
 
     const container = scrollContainerRef.current;
@@ -179,10 +180,14 @@ const Gallery: React.FC = () => {
                       <button className="text-white/70 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-lg">
                         <Download className="w-4 h-4" />
                       </button>
-                      <div className="flex items-center space-x-1 text-white/70 group/like">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); likeItem(item.id).catch(() => {}); }}
+                        className="flex items-center space-x-1 text-white/70 group/like p-1 hover:bg-white/5 rounded-lg"
+                        title="点赞"
+                      >
                         <Heart className="w-4 h-4 group-hover/like:text-red-500 group-hover/like:fill-red-500 transition-all" />
                         <span className="text-xs font-light">{item.likes}</span>
-                      </div>
+                      </button>
                     </div>
                   </div>
                 </div>
