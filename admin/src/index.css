@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg:#071227; /* deep navy */
+  --panel:#0c1424; /* panel dark */
+  --panel-2:#0f1726;
+  --muted:#98a0b5;
+  --accent:#7c5cff;
+  --accent-2:#6a4ef0;
+  --glass: rgba(255,255,255,0.03);
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  color-scheme: dark;
+  color: rgba(255,255,255,0.95);
+  background-color: var(--bg);
+}
+
+html,body,#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: rgba(255,255,255,0.92);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--accent);
+}
+
+button {
+  border-radius: 10px;
+  border: 1px solid transparent;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+/* small utility */
+.glass {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  backdrop-filter: blur(6px);
+}
+
+/* accent button */
+.accent-btn {
+  background: linear-gradient(90deg,var(--accent),var(--accent-2));
+  color: white;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .logo-spin {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+@keyframes logo-spin { from { transform: rotate(0deg)} to {transform: rotate(360deg)} }
+
