@@ -11,10 +11,10 @@ const Home: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const { artists, fetchArtists } = useArtistStore();
+  const { artists, fetchArtists, loading: artistsLoading } = useArtistStore();
   const { items: galleryItems, fetchGalleryItems, loading: galleryLoading } = useGalleryStore();
-  const { srefs, fetchSrefs } = useSrefStore();
-  const { categories, fetchCategories } = useCategoriesStore();
+  const { srefs, fetchSrefs, loading: srefsLoading } = useSrefStore();
+  const { categories, fetchCategories, loading: categoriesLoading } = useCategoriesStore();
 
   // 从 API 获取分类数据
   React.useEffect(() => {
@@ -140,7 +140,11 @@ const Home: React.FC = () => {
           {activeTab === '艺术家' ? (
             <div>
               {galleryLoading && galleryItems.length === 0 ? (
-                <div className="py-6 text-gray-400">正在加载画廊示例...</div>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="aspect-square rounded-2xl bg-gray-900/50 animate-pulse border border-white/5" />
+                  ))}
+                </div>
               ) : (
                 galleryItems && galleryItems.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
@@ -156,7 +160,14 @@ const Home: React.FC = () => {
               )}
 
               <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-x-4 gap-y-10">
-                {filteredArtists.length > 0 ? (
+                {artistsLoading && artists.length === 0 ? (
+                  [...Array(12)].map((_, i) => (
+                    <div key={i} className="space-y-3">
+                      <div className="aspect-square rounded-2xl bg-gray-900/50 animate-pulse border border-white/5" />
+                      <div className="h-4 w-2/3 bg-gray-800 rounded animate-pulse mx-auto" />
+                    </div>
+                  ))
+                ) : filteredArtists.length > 0 ? (
                   filteredArtists.map((artist) => (
                     <div key={artist.id} className="group cursor-pointer">
                       <div className="aspect-square rounded-2xl overflow-hidden bg-gray-900/50 border border-white/5 group-hover:border-blue-500/30 transition-all relative">
@@ -182,7 +193,11 @@ const Home: React.FC = () => {
             </div>
           ) : activeTab === 'Midjourney风格码' ? (
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredSrefs.length > 0 ? (
+                {srefsLoading && srefs.length === 0 ? (
+                  [...Array(8)].map((_, i) => (
+                    <div key={i} className="bg-gray-900/40 rounded-3xl border border-white/5 h-64 animate-pulse" />
+                  ))
+                ) : filteredSrefs.length > 0 ? (
                   filteredSrefs.map((sref) => (
                     <div key={sref.id} className="group bg-gray-900/40 rounded-3xl border border-white/5 overflow-hidden hover:border-blue-500/30 transition-all">
                       <div className="aspect-4/3 overflow-hidden relative">
@@ -227,7 +242,12 @@ const Home: React.FC = () => {
              </div>
           ) : (
             <div className="space-y-10">
-              {filteredSubCategories.length > 0 ? (
+              {categoriesLoading && categories.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-gray-500 space-y-4">
+                  <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                  <p>正在加载分类数据...</p>
+                </div>
+              ) : filteredSubCategories.length > 0 ? (
                 filteredSubCategories.map((sub, idx) => (
                   <TagSection 
                     key={`${sub.name}-${idx}`}

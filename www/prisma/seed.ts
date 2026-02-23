@@ -126,10 +126,19 @@ async function main() {
           {
             name: '人物 (Character)',
             phrases: ['Q版古典女神', 'BJD人偶', '女主角', '男性', '帅哥', '美女'],
+            items: [
+              { id: '1', name: 'Q版古典女神', tags: ['Q版', '古典'], cover: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2' },
+              { id: '2', name: 'BJD人偶', tags: ['人偶', '二次元'], cover: 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5' },
+              { id: '3', name: '女主角', tags: ['主角', '女性'], cover: 'https://images.unsplash.com/photo-1554151228-14d9def656e4' },
+            ],
           },
           {
             name: '风景 (Landscape)',
             phrases: ['森林', '海滩', '山峰', '城市', '沙漠'],
+            items: [
+              { id: '4', name: '森林', tags: ['自然', '绿色'], cover: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e' },
+              { id: '5', name: '海滩', tags: ['海洋', '度假'], cover: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e' },
+            ],
           },
         ],
       },
@@ -139,10 +148,10 @@ async function main() {
           {
             name: '艺术风格 (Art Style)',
             phrases: ['油画', '水彩', '插画', '摄影', 'CG渲染'],
-          },
-          {
-            name: '情感与氛围 (Emotion)',
-            phrases: ['唯美', '梦幻', '忧郁', '治愈', '黑暗'],
+            items: [
+              { id: '6', name: '油画', tags: ['艺术', '古典'], cover: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5' },
+              { id: '7', name: '水彩', tags: ['艺术', '清新'], cover: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab' },
+            ],
           },
         ],
       },
@@ -152,19 +161,10 @@ async function main() {
           {
             name: '视角 (Perspective)',
             phrases: ['俯视', '仰视', '全景', '特写', '侧面'],
-          },
-        ],
-      },
-      {
-        mainCategory: '环境 (Environment)',
-        subCategories: [
-          {
-            name: '光线 (Lighting)',
-            phrases: ['自然光', '逆光', '柔光', '硬光', '蓝光'],
-          },
-          {
-            name: '背景 (Background)',
-            phrases: ['纯色', '模糊', '天空', '室内', '自然'],
+            items: [
+              { id: '8', name: '全景', tags: ['宽阔', '远景'] },
+              { id: '9', name: '特写', tags: ['细节', '近景'] },
+            ],
           },
         ],
       },
@@ -174,7 +174,7 @@ async function main() {
       await prisma.category.create({
         data: {
           mainCategory: cat.mainCategory,
-          subCategories: cat.subCategories,
+          subCategories: cat.subCategories as any,
         },
       });
     }

@@ -7,7 +7,7 @@ interface SrefStore {
   error: string | null;
 
   // 获取所有Sref
-  fetchSrefs: () => Promise<void>;
+  fetchSrefs: (force?: boolean) => Promise<void>;
 
   // 按标签搜索Sref
   searchSrefsByTag: (tag: string) => Promise<void>;
@@ -16,19 +16,21 @@ interface SrefStore {
   reset: () => void;
 }
 
-export const useSrefStore = create<SrefStore>((set) => ({
+export const useSrefStore = create<SrefStore>((set, get) => ({
   srefs: [],
   loading: false,
   error: null,
 
-  fetchSrefs: async () => {
+  fetchSrefs: async (force = false) => {
+    if (!force && (get().srefs.length > 0 || get().loading)) return;
+
     set({ loading: true, error: null });
     try {
       const srefs = await getAllSrefs();
       set({ srefs });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch srefs';
-      set({ error: message });
+      set({ error: message, srefs: [] });
     } finally {
       set({ loading: false });
     }

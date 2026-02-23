@@ -2,3 +2,5 @@
 export * from './api';
 export * from './gallery.service';
 export * from './artist.service';
+export * from './categories.service';
+export * from './sref.service';

@@ -41,7 +41,7 @@ export interface CreateGalleryItemInput {
  */
 export const getAllGalleryItems = async (category?: string): Promise<GalleryItem[]> => {
   try {
-    const endpoint = category ? `/gallery?category=${category}` : "/gallery";
+    const endpoint = category ? `/gallery?category=${encodeURIComponent(category)}` : "/gallery";
     const response = await apiGet<GalleryItem[]>(endpoint);
     return response.data || [];
   } catch (error) {

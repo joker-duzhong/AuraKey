@@ -2,10 +2,12 @@ import { Request, Response } from 'express';
 import {
   findAllCategories,
   findCategoryByName,
+  findCategoryById,
   createCategory,
   updateCategory,
   deleteCategory,
   searchCategoriesByPhrase,
+  updateSubCategoryItems,
   CategoryInput,
 } from '../services/category.service';
 
@@ -15,6 +17,24 @@ export const getAllCategories = async (req: Request, res: Response) => {
     res.json({
       message: 'Categories retrieved successfully',
       data: categories,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error', error });
+  }
+};
+
+export const getCategoryByIdHandler = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const category = await findCategoryById(id);
+
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+
+    res.json({
+      message: 'Category retrieved successfully',
+      data: category,
     });
   } catch (error) {
     res.status(500).json({ message: 'Internal server error', error });
@@ -83,10 +103,32 @@ export const updateCategoryHandler = async (req: Request, res: Response) => {
   }
 };
 
+export const updateCategoryItemsHandler = async (req: Request, res: Response) => {
+  try {
+    const { id, subName } = req.params;
+    const { items } = req.body;
+
+    if (!items || !Array.isArray(items)) {
+      return res.status(400).json({ message: 'Items array is required' });
+    }
+
+    const categoryId = id as string;
+    const subCategoryName = decodeURIComponent(subName as string);
+
+    const category = await updateSubCategoryItems(categoryId, subCategoryName, items);
+    res.json({
+      message: 'Subcategory items updated successfully',
+      data: category,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message || 'Internal server error', error });
+  }
+};
+
 export const deleteCategoryHandler = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await deleteCategory(id);
+    await deleteCategory(id as string);
 
     res.json({ message: 'Category deleted successfully' });
   } catch (error: any) {

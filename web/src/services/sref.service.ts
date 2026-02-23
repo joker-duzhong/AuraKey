@@ -1,5 +1,4 @@
 import { apiGet, apiPost, apiPut, apiDelete } from './api';
-import { SrefData } from '../mock/categories';
 
 export interface Sref {
   id: string;
@@ -25,12 +24,8 @@ export const getAllSrefs = async (): Promise<Sref[]> => {
     const response = await apiGet<Sref[]>('/srefs');
     return response.data || [];
   } catch (error) {
-    console.error('Failed to fetch srefs from API, using local mock data:', error);
-    // 如果API不可用，使用本地mock数据作为降级方案
-    return SrefData.map(sref => ({
-      ...sref,
-      createdAt: new Date().toISOString(),
-    }));
+    console.error('Failed to fetch srefs from API:', error);
+    throw error;
   }
 };
 
@@ -59,7 +54,7 @@ export const getSrefById = async (id: string): Promise<Sref> => {
  */
 export const getSrefsByTag = async (tag: string): Promise<Sref[]> => {
   try {
-    const response = await apiGet<Sref[]>(`/srefs/search/by-tag?tag=${tag}`);
+    const response = await apiGet<Sref[]>(`/srefs/search/by-tag?tag=${encodeURIComponent(tag)}`);
     return response.data || [];
   } catch (error) {
     console.error(`Failed to fetch srefs by tag ${tag}:`, error);

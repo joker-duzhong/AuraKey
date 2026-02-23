@@ -114,7 +114,7 @@ async function runAllTests() {
 }
 
 // 导出供使用
-window.apiTests = {
+(window as any).apiTests = {
   testGalleryAPI,
   testArtistAPI,
   testFrontendServices,

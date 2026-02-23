@@ -8,7 +8,7 @@ interface ArtistStore {
   error: string | null;
 
   // 获取所有艺术家
-  fetchArtists: () => Promise<void>;
+  fetchArtists: (force?: boolean) => Promise<void>;
 
   // 获取单个艺术家
   fetchArtistById: (id: string) => Promise<void>;
@@ -23,20 +23,22 @@ interface ArtistStore {
   reset: () => void;
 }
 
-export const useArtistStore = create<ArtistStore>((set) => ({
+export const useArtistStore = create<ArtistStore>((set, get) => ({
   artists: [],
   selectedArtist: null,
   loading: false,
   error: null,
 
-  fetchArtists: async () => {
+  fetchArtists: async (force = false) => {
+    if (!force && (get().artists.length > 0 || get().loading)) return;
+
     set({ loading: true, error: null });
     try {
       const artists = await getAllArtists();
       set({ artists });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch artists';
-      set({ error: message });
+      set({ error: message, artists: [] });
     } finally {
       set({ loading: false });
     }

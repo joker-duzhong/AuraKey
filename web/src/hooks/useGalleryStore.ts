@@ -8,7 +8,7 @@ interface GalleryStore {
   error: string | null;
 
   // 获取画廊项目
-  fetchGalleryItems: (category?: string) => Promise<void>;
+  fetchGalleryItems: (category?: string, force?: boolean) => Promise<void>;
   
   // 获取单个画廊项目
   fetchGalleryItemById: (id: string) => Promise<void>;
@@ -29,14 +29,16 @@ export const useGalleryStore = create<GalleryStore>((set, get) => ({
   loading: false,
   error: null,
 
-  fetchGalleryItems: async (category?: string) => {
+  fetchGalleryItems: async (category?: string, force = false) => {
+    if (!force && (get().items.length > 0 || get().loading) && !category) return;
+
     set({ loading: true, error: null });
     try {
       const items = await getAllGalleryItems(category);
       set({ items });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch gallery items';
-      set({ error: message });
+      set({ error: message, items: [] });
     } finally {
       set({ loading: false });
     }

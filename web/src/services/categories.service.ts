@@ -1,5 +1,4 @@
 import { apiGet } from './api';
-import { categoriesData } from '../mock/categories';
 
 export interface Category {
   mainCategory: string;
@@ -20,9 +19,8 @@ export const getAllCategories = async (): Promise<Category[]> => {
     const response = await apiGet<Category[]>('/categories');
     return response.data || [];
   } catch (error) {
-    console.error('Failed to fetch categories from API, using local mock data:', error);
-    // 如果API不可用，使用本地mock数据作为降级方案
-    return categoriesData.categories;
+    console.error('Failed to fetch categories from API:', error);
+    throw error;
   }
 };
 
@@ -48,7 +46,7 @@ export const getCategoryByName = async (name: string): Promise<Category | null> 
  */
 export const searchPhrases = async (keyword: string): Promise<Category[]> => {
   try {
-    const response = await apiGet<Category[]>(`/categories/search/phrases?keyword=${encodeURIComponent(keyword)}`);
+    const response = await apiGet<Category[]>(`/categories/search?keyword=${encodeURIComponent(keyword)}`);
     return response.data || [];
   } catch (error) {
     console.error(`Failed to search phrases for ${keyword}:`, error);
