@@ -25,7 +25,7 @@ export const getAllGalleryItems = async (req: Request, res: Response) => {
 export const getGalleryItemById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const item = await findGalleryItemById(id);
+    const item = await findGalleryItemById(id as any);
 
     if (!item) {
       return res.status(404).json({ message: 'Gallery item not found' });
@@ -78,7 +78,7 @@ export const updateGalleryItemHandler = async (req: Request, res: Response) => {
     const { id } = req.params;
     const updates = req.body;
 
-    const item = await updateGalleryItem(id, updates);
+    const item = await updateGalleryItem(id as any, updates);
     res.json({
       message: 'Gallery item updated successfully',
       data: item,
@@ -91,7 +91,7 @@ export const updateGalleryItemHandler = async (req: Request, res: Response) => {
 export const deleteGalleryItemHandler = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await deleteGalleryItem(id);
+    await deleteGalleryItem(id as any);
 
     res.json({ message: 'Gallery item deleted successfully' });
   } catch (error) {
@@ -102,7 +102,7 @@ export const deleteGalleryItemHandler = async (req: Request, res: Response) => {
 export const likeGalleryItemHandler = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const item = await likeGalleryItem(id);
+    const item = await likeGalleryItem(id as any);
 
     res.json({
       message: 'Gallery item liked successfully',

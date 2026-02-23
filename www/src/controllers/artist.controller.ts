@@ -24,7 +24,7 @@ export const getAllArtists = async (req: Request, res: Response) => {
 export const getArtistById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const artist = await findArtistById(id);
+    const artist = await findArtistById(id as any);
 
     if (!artist) {
       return res.status(404).json({ message: 'Artist not found' });
@@ -96,7 +96,7 @@ export const updateArtistHandler = async (req: Request, res: Response) => {
     const { id } = req.params;
     const updates = req.body;
 
-    const artist = await updateArtist(id, updates);
+    const artist = await updateArtist(id as any, updates);
     res.json({
       message: 'Artist updated successfully',
       data: artist,
@@ -109,7 +109,7 @@ export const updateArtistHandler = async (req: Request, res: Response) => {
 export const deleteArtistHandler = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await deleteArtist(id);
+    await deleteArtist(id as any);
 
     res.json({ message: 'Artist deleted successfully' });
   } catch (error) {

@@ -26,7 +26,7 @@ export const getAllCategories = async (req: Request, res: Response) => {
 export const getCategoryByIdHandler = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const category = await findCategoryById(id);
+    const category = await findCategoryById(id as any);
 
     if (!category) {
       return res.status(404).json({ message: 'Category not found' });
@@ -44,7 +44,7 @@ export const getCategoryByIdHandler = async (req: Request, res: Response) => {
 export const getCategoryByName = async (req: Request, res: Response) => {
   try {
     const { name } = req.params;
-    const category = await findCategoryByName(decodeURIComponent(name));
+    const category = await findCategoryByName(decodeURIComponent(name as any));
 
     if (!category) {
       return res.status(404).json({ message: 'Category not found' });
@@ -90,7 +90,7 @@ export const updateCategoryHandler = async (req: Request, res: Response) => {
     const { id } = req.params;
     const updates = req.body;
 
-    const category = await updateCategory(id, updates);
+    const category = await updateCategory(id as any, updates);
     res.json({
       message: 'Category updated successfully',
       data: category,

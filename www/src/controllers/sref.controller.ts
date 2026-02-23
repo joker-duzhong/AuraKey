@@ -24,7 +24,7 @@ export const getAllSrefs = async (req: Request, res: Response) => {
 export const getSrefById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const sref = await findSrefById(id);
+    const sref = await findSrefById(id as any);
 
     if (!sref) {
       return res.status(404).json({ message: 'Sref not found' });
@@ -89,7 +89,7 @@ export const updateSrefHandler = async (req: Request, res: Response) => {
     const { id } = req.params;
     const updates = req.body;
 
-    const sref = await updateSref(id, updates);
+    const sref = await updateSref(id as any, updates);
     res.json({
       message: 'Sref updated successfully',
       data: sref,
@@ -105,7 +105,7 @@ export const updateSrefHandler = async (req: Request, res: Response) => {
 export const deleteSrefHandler = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await deleteSref(id);
+    await deleteSref(id as any);
 
     res.json({ message: 'Sref deleted successfully' });
   } catch (error: any) {
