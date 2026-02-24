@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'https://zaiwen.lxyy.fun/api';
+export const API_BASE_URL = "https://zaiwen.lxyy.fun/api";
 
 export interface ApiResponse<T = any> {
   message: string;
@@ -10,16 +10,13 @@ export interface ApiResponse<T = any> {
 }
 
 const getToken = (): string | null => {
-  return localStorage.getItem('admin_token');
+  return localStorage.getItem("admin_token");
 };
 
-export const apiRequest = async <T = any>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> => {
-  const url = `${API_BASE_URL}${endpoint}`;
+export const apiRequest = async <T = any>(endpoint: string, options: RequestInit = {}): Promise<T> => {
+  const url = endpoint?.includes("http") ? endpoint : `${API_BASE_URL}${endpoint}`;
   const headers: any = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...options.headers,
   };
 
@@ -35,13 +32,13 @@ export const apiRequest = async <T = any>(
     });
 
     if (response.status === 401) {
-      localStorage.removeItem('admin_token');
-      localStorage.removeItem('admin_user');
-      window.location.href = '/login';
+      localStorage.removeItem("admin_token");
+      localStorage.removeItem("admin_user");
+      window.location.href = "/login";
     }
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.message || `API Error: ${response.status}`);
     }
