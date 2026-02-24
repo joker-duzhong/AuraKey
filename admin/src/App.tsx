@@ -28,7 +28,7 @@ const App: React.FC = () => {
   return (
     <ToastProvider>
       <AuthProvider>
-        <BrowserRouter>
+        <BrowserRouter basename="/admin">
           <Routes>
             <Route path="/login" element={<Login />} />
             
