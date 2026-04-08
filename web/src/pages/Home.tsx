@@ -33,8 +33,11 @@ const Home: React.FC = () => {
       ...sub,
       phrases: sub.phrases.filter(phrase => 
         phrase.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+      items: sub.items?.filter(item => 
+        item.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
-    })).filter(sub => sub.phrases.length > 0) || [];
+    })).filter(sub => (sub.phrases.length > 0) || (sub.items && sub.items.length > 0)) || [];
   }, [activeCategory, searchQuery]);
 
   const filteredArtists = useMemo(() => {
@@ -254,6 +257,7 @@ const Home: React.FC = () => {
                     title={sub.name} 
                     icon={<Sparkles className="w-5 h-5 text-blue-500" />}
                     tags={sub.phrases} 
+                    items={sub.items}
                   />
                 ))
               ) : (

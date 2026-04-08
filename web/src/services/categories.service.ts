@@ -5,9 +5,17 @@ export interface Category {
   subCategories: SubCategory[];
 }
 
+export interface PhraseItem {
+  id: string;
+  name: string;
+  cover?: string;
+  tags?: string[];
+}
+
 export interface SubCategory {
   name: string;
   phrases: string[];
+  items?: PhraseItem[];
 }
 
 /**

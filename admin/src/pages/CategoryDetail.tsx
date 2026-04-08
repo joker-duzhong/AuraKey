@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Search, Plus, ChevronDown, ArrowLeft, Image as ImageIcon, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Search, Plus, ChevronDown, ArrowLeft, Image as ImageIcon, ChevronLeft, ChevronRight, X, Upload } from "lucide-react";
 import * as categoryService from "../services/categoryService";
 import { useCategoryStore } from "../store/categoryStore";
 import type { Category } from "../store/categoryStore";
 import { useToast } from "../context/ToastContext";
 import ConfirmModal from "../components/ui/ConfirmModal";
+import { HUpload } from "../utils/h-upload";
 
 interface PhraseItem {
   id: string;
@@ -37,6 +38,8 @@ const CategoryDetail: React.FC = () => {
     tags: [] as string[],
   });
   const [newTag, setNewTag] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Confirm states
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -173,6 +176,27 @@ const CategoryDetail: React.FC = () => {
 
   const removeTag = (tag: string) => {
     setFormData({ ...formData, tags: formData.tags.filter((t) => t !== tag) });
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      const results = await HUpload(files);
+      if (results && results.length > 0) {
+        // HUpload 现在直接返回 URL 数组
+        const imageUrl = results[0];
+        setFormData(prev => ({ ...prev, cover: imageUrl }));
+        showToast("图片上传成功");
+      }
+    } catch (error) {
+      showToast("图片上传失败", "error");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const openAddModal = () => {
@@ -371,26 +395,66 @@ const CategoryDetail: React.FC = () => {
 
             <div className="p-6 overflow-y-auto space-y-6 flex-1">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">图片地址</label>
-                <div className="flex space-x-3">
-                  <div className="w-16 h-16 rounded-xl bg-gray-50 border-2 border-dashed border-gray-200 flex items-center justify-center flex-shrink-0">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">封面图</label>
+                <div className="flex items-start space-x-4">
+                  <div 
+                    className={`w-24 h-24 rounded-2xl border-2 border-dashed border-gray-200 flex items-center justify-center relative group cursor-pointer overflow-hidden transition-all hover:border-blue-400 ${isUploading ? 'bg-gray-50' : ''}`}
+                    onClick={() => !isUploading && fileInputRef.current?.click()}
+                  >
                     {formData.cover ? (
-                      <img
-                        src={formData.cover}
-                        alt="Preview"
-                        className="w-full h-full object-cover rounded-lg"
-                      />
+                      <>
+                        <img
+                          src={formData.cover}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Upload className="text-white" size={20} />
+                        </div>
+                      </>
                     ) : (
-                      <ImageIcon className="text-gray-300" />
+                      <div className="flex flex-col items-center space-y-1">
+                        <Upload className="text-gray-400" size={24} />
+                        <span className="text-[10px] text-gray-400">点击上传</span>
+                      </div>
+                    )}
+                    
+                    {isUploading && (
+                      <div className="absolute inset-0 bg-white/80 flex items-center justify-center font-semibold">
+                        <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
                     )}
                   </div>
-                  <input
-                    type="text"
-                    className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
-                    placeholder="请输入封面图片 URL"
-                    value={formData.cover}
-                    onChange={(e) => setFormData({ ...formData, cover: e.target.value })}
-                  />
+
+                  <div className="flex-1 space-y-3">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2 bg-gray-50/50 border border-gray-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all pr-10"
+                        placeholder="或输入图片 URL"
+                        value={formData.cover}
+                        onChange={(e) => setFormData({ ...formData, cover: e.target.value })}
+                      />
+                      {formData.cover && (
+                        <button 
+                          onClick={() => setFormData({ ...formData, cover: "" })}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-rose-500 transition-colors"
+                        >
+                          <X size={14} />
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-gray-400">
+                      支持 JPG, PNG, WebP。建议尺寸 512x512px。
+                    </p>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                    />
+                  </div>
                 </div>
               </div>
 

@@ -8,6 +8,7 @@ import Categories from './pages/Categories';
 import CategoryDetail from './pages/CategoryDetail';
 import Artists from './pages/Artists';
 import Srefs from './pages/Srefs';
+import './index.css'
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {

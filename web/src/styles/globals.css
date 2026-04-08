@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@source "../**/*.tsx";
+
 @theme {
   --color-background: #0f111a;
   --color-primary: #6366f1;

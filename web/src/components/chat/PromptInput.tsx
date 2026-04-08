@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Plus, Copy, Send, Check } from 'lucide-react';
+import { Plus, Copy, Send, Check, Loader2 } from 'lucide-react';
 import { usePromptStore } from '../../hooks/usePromptStore';
+import { generateImage } from '../../services/image.service';
 
 interface PromptInputProps {
   className?: string;
@@ -10,6 +11,28 @@ interface PromptInputProps {
 const PromptInput: React.FC<PromptInputProps> = ({ className = '', isFloating = true }) => {
   const { prompt, setPrompt } = usePromptStore();
   const [copied, setCopied] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleGenerate = async () => {
+    if (!prompt.trim() || isGenerating) return;
+    
+    setIsGenerating(true);
+    try {
+      const result = await generateImage({
+        prompt: prompt.trim(),
+        model: "Seedream4.0",
+        ratio: "1:1",
+        num: 1
+      });
+      console.log('Generated images:', result);
+      // TODO: Handle the generated images (e.g., display them or add to gallery)
+    } catch (error) {
+      console.error('Generation failed:', error);
+      // TODO: Show error toast
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleCopy = async () => {
     if (!prompt) return;
@@ -72,10 +95,20 @@ const PromptInput: React.FC<PromptInputProps> = ({ className = '', isFloating = 
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             </button>
-            <button className={`p-2 rounded-xl transition-all duration-200 ${
-              prompt.trim() ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20 hover:bg-blue-500' : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-            }`}>
-              <Send className="w-4 h-4" />
+            <button
+              onClick={handleGenerate}
+              disabled={!prompt.trim() || isGenerating}
+              className={`p-2 rounded-xl transition-all duration-200 ${
+                prompt.trim() && !isGenerating
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20 hover:bg-blue-500'
+                  : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              {isGenerating ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
             </button>
           </div>
         </div>

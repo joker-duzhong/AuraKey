@@ -48,6 +48,20 @@ const MainLayout: React.FC = () => {
             <LogOut size={20} />
             {isSidebarOpen && <span className="ml-3">退出登录</span>}
           </button>
+
+          {isSidebarOpen && (
+            <div className="mt-4 flex flex-col items-center space-y-1 pb-2">
+              <a
+                href="https://beian.miit.gov.cn/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-400 hover:text-blue-500 transition-colors"
+              >
+                京ICP备XXXXXXXX号
+              </a>
+              <span className="text-[10px] text-gray-300">© 2024 AuraKey</span>
+            </div>
+          )}
         </div>
       </aside>
 
